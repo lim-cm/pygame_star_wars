@@ -70,7 +70,7 @@ def create_cockpit():
 def shoot_laser(x, y, dir_x, dir_y, radius):
     x += dir_x * laser_speed
     y += dir_y * laser_speed
-    radius -= .1
+    radius -= .15
 
     # Draw the laser
     pygame.draw.circle(SCREEN, red, (x, y), radius)
@@ -87,9 +87,10 @@ crosshairs_rect = crosshairs.get_rect()
 cockpit = create_cockpit()
 
 laser_radius = 10
-laser_speed = 8
+laser_speed = 15
 lasers1 = []
 lasers2 = []
+laser_count = 0
 """
 Main game loop
 """
@@ -102,41 +103,44 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            mouse_x, mouse_y = pygame.mouse.get_pos()
-            
-            # Starting position of the lasers at the start of the cockpit, on both sides
-            start_x1, start_y1 = 683, 657
-
-            # Calculate direction vector
-            dx1 = mouse_x - start_x1
-            dy1= mouse_y - start_y1
-            
-            distance1 = math.sqrt(dx1**2 + dy1**2)
-            direction_x1 = dx1 / distance1
-            direction_y1 = dy1 / distance1
-            
-            start_x2, start_y2 = 787, 657
-            dx2 = mouse_x - start_x2
-            dy2= mouse_y - start_y2 
-            distance2 = math.sqrt(dx2**2 + dy2**2)
-            direction_x2 = dx2 / distance2
-            direction_y2 = dy2 / distance2
-            
+            mouse_x, mouse_y = pygame.mouse.get_pos()       
+            laser_count += 1
             # Add laser to list with its direction
-            lasers1.append({
-                "x": start_x1,
-                "y": start_y1,
-                "dir_x": direction_x1,
-                "dir_y": direction_y1,
-                "radius": laser_radius
-            })
-            lasers2.append({
-                "x": start_x2,
-                "y": start_y2,
-                "dir_x": direction_x2,
-                "dir_y": direction_y2,
-                "radius": laser_radius
-            })
+            if(laser_count % 2 == 0):
+                # Starting position of the lasers at the start of the cockpit, on both sides
+                start_x1, start_y1 = 334, 657
+
+                # Calculate direction vector
+                dx1 = mouse_x - start_x1
+                dy1= mouse_y - start_y1
+                
+                distance1 = math.sqrt(dx1**2 + dy1**2)
+                direction_x1 = dx1 / distance1
+                direction_y1 = dy1 / distance1
+            
+                lasers1.append({
+                    "x": start_x1,
+                    "y": start_y1,
+                    "dir_x": direction_x1,
+                    "dir_y": direction_y1,
+                    "radius": laser_radius,
+                })
+                laser_count = 0
+            else:
+                start_x2, start_y2 = 1072, 657
+                dx2 = mouse_x - start_x2
+                dy2= mouse_y - start_y2 
+                distance2 = math.sqrt(dx2**2 + dy2**2)
+                direction_x2 = dx2 / distance2
+                direction_y2 = dy2 / distance2
+                
+                lasers2.append({
+                    "x": start_x2,
+                    "y": start_y2,
+                    "dir_x": direction_x2,
+                    "dir_y": direction_y2,
+                    "radius": laser_radius,
+                })
     
     draw_stars(stars_x_pos, stars_y_pos, stars_radii) #draws stars on the screen
     
@@ -148,14 +152,14 @@ while True:
     SCREEN.blit(crosshairs, crosshairs_rect)
     
     # Move and draw each laser
-    for laser1, laser2 in zip(lasers1, lasers2):
+    for laser1 in lasers1:
         if(laser1["radius"] <= 0):
             lasers1.remove(laser1)
+        laser1["x"], laser1["y"], laser1["radius"] = shoot_laser(laser1["x"], laser1["y"], laser1["dir_x"], laser1["dir_y"], laser1["radius"])
+    
+    for laser2 in lasers2:    
         if(laser2["radius"] <= 0):
             lasers2.remove(laser2)
-        print(f"Lasers 1: {lasers1}")
-        print(f"Lasers 2: {lasers2}")
-        laser1["x"], laser1["y"], laser1["radius"] = shoot_laser(laser1["x"], laser1["y"], laser1["dir_x"], laser1["dir_y"], laser1["radius"])
         laser2["x"], laser2["y"], laser2["radius"] = shoot_laser(laser2["x"], laser2["y"], laser2["dir_x"], laser2["dir_y"], laser2["radius"])
     
     
