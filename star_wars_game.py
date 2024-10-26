@@ -75,7 +75,6 @@ def shoot_laser(x, y, dir_x, dir_y, radius):
     # Draw the laser
     pygame.draw.circle(SCREEN, red, (x, y), radius)
     return x,y, radius
-
 '''
 The code below and prior to the main game loop initializes important variables
 '''
@@ -91,6 +90,15 @@ laser_speed = 15
 lasers1 = []
 lasers2 = []
 laser_count = 0
+
+'''
+TODO: add cooldown for laser
+COOLDOWN_TIME = 1000
+clickCounter = 0
+last_shot_time = 0
+'''
+
+
 """
 Main game loop
 """
@@ -103,6 +111,14 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN:
+            '''
+            current_time = pygame.time.get_ticks()
+            if current_time - last_shot_time >= COOLDOWN_TIME:
+                # Update last shot time
+                last_shot_time = current_time
+                last_shot_time = current_time
+                current_cooldown_time = BASE_COOLDOWN_TIME
+            '''
             mouse_x, mouse_y = pygame.mouse.get_pos()       
             laser_count += 1
             # Add laser to list with its direction
@@ -160,8 +176,7 @@ while True:
     for laser2 in lasers2:    
         if(laser2["radius"] <= 0):
             lasers2.remove(laser2)
-        laser2["x"], laser2["y"], laser2["radius"] = shoot_laser(laser2["x"], laser2["y"], laser2["dir_x"], laser2["dir_y"], laser2["radius"])
-    
+        laser2["x"], laser2["y"], laser2["radius"] = shoot_laser(laser2["x"], laser2["y"], laser2["dir_x"], laser2["dir_y"], laser2["radius"])       
     
     SCREEN.blit(cockpit, (0,220)) #displays the cockpit 
     pygame.display.update()
