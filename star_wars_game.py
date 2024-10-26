@@ -9,6 +9,7 @@ import random, math
 
 #initializing pygame and fps for the game
 pygame.init()
+pygame.mixer.init()
 FPS = 60
 clock = pygame.time.Clock()
 
@@ -22,11 +23,17 @@ SCREEN_WIDTH = 1490
 SCREEN_HEIGHT = 1000
 SCREEN = pygame.display.set_mode((SCREEN_WIDTH,SCREEN_HEIGHT))
 SCREEN.fill(black)
+background_music = "audio_files/star_wars_theme_8_bit.mp3"
+pygame.mixer.music.load(background_music)
+pygame.mixer.music.set_volume(0.25)
+pygame.mixer.music.play(-1)
 pygame.display.set_caption("Star Wars Game")
 
 def import_img(image_path):
     return pygame.image.load(image_path)
 
+def import_sound(file_path):
+    return pygame.mixer.Sound(file_path)
 '''
 Generates a random integer in a range
 '''
@@ -90,6 +97,7 @@ laser_speed = 15
 lasers1 = []
 lasers2 = []
 laser_count = 0
+laser_sound = pygame.mixer.Sound("audio_files/laser_xwing.mp3")
 
 '''
 TODO: add cooldown for laser
@@ -110,7 +118,7 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN or (event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE):
             '''
             current_time = pygame.time.get_ticks()
             if current_time - last_shot_time >= COOLDOWN_TIME:
@@ -142,6 +150,7 @@ while True:
                     "radius": laser_radius,
                 })
                 laser_count = 0
+                laser_sound.play()
             else:
                 start_x2, start_y2 = 1072, 657
                 dx2 = mouse_x - start_x2
@@ -157,6 +166,7 @@ while True:
                     "dir_y": direction_y2,
                     "radius": laser_radius,
                 })
+                laser_sound.play()
     
     draw_stars(stars_x_pos, stars_y_pos, stars_radii) #draws stars on the screen
     
