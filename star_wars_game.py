@@ -5,7 +5,7 @@ unfinished project in high school. It was the first project that showed me the j
 """
 import pygame, sys
 from pygame.locals import *
-import random
+import random, math
 
 #initializing pygame and fps for the game
 pygame.init()
@@ -15,6 +15,7 @@ clock = pygame.time.Clock()
 #setting up colors
 black = pygame.Color(0,0,0)
 white = pygame.Color(255,255,255)
+red = pygame.Color(255, 0, 0)
 
 #screen dimentions/setting up screen w size 1490 x 1000, background color black
 SCREEN_WIDTH = 1490
@@ -66,6 +67,15 @@ def create_cockpit():
     scaled_image = pygame.transform.scale(cockpit, (scaled_width, scaled_height))
     return scaled_image
 
+def shoot_laser(x, y, dir_x, dir_y, radius):
+    x += dir_x * laser_speed
+    y += dir_y * laser_speed
+    radius -= .1
+
+    # Draw the laser
+    pygame.draw.circle(SCREEN, red, (x, y), radius)
+    return x,y, radius
+
 '''
 The code below and prior to the main game loop initializes important variables
 '''
@@ -76,6 +86,10 @@ crosshairs = create_crosshairs()
 crosshairs_rect = crosshairs.get_rect()
 cockpit = create_cockpit()
 
+laser_radius = 10
+laser_speed = 8
+lasers1 = []
+lasers2 = []
 """
 Main game loop
 """
@@ -87,14 +101,62 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            
+            # Starting position of the lasers at the start of the cockpit, on both sides
+            start_x1, start_y1 = 683, 657
+
+            # Calculate direction vector
+            dx1 = mouse_x - start_x1
+            dy1= mouse_y - start_y1
+            
+            distance1 = math.sqrt(dx1**2 + dy1**2)
+            direction_x1 = dx1 / distance1
+            direction_y1 = dy1 / distance1
+            
+            start_x2, start_y2 = 787, 657
+            dx2 = mouse_x - start_x2
+            dy2= mouse_y - start_y2 
+            distance2 = math.sqrt(dx2**2 + dy2**2)
+            direction_x2 = dx2 / distance2
+            direction_y2 = dy2 / distance2
+            
+            # Add laser to list with its direction
+            lasers1.append({
+                "x": start_x1,
+                "y": start_y1,
+                "dir_x": direction_x1,
+                "dir_y": direction_y1,
+                "radius": laser_radius
+            })
+            lasers2.append({
+                "x": start_x2,
+                "y": start_y2,
+                "dir_x": direction_x2,
+                "dir_y": direction_y2,
+                "radius": laser_radius
+            })
     
     draw_stars(stars_x_pos, stars_y_pos, stars_radii) #draws stars on the screen
     
     
     #code to display crosshairs
     mouse_x, mouse_y = pygame.mouse.get_pos()
+    print(mouse_x, mouse_y)
     crosshairs_rect.center = (mouse_x, mouse_y)
     SCREEN.blit(crosshairs, crosshairs_rect)
+    
+    # Move and draw each laser
+    for laser1, laser2 in zip(lasers1, lasers2):
+        if(laser1["radius"] <= 0):
+            lasers1.remove(laser1)
+        if(laser2["radius"] <= 0):
+            lasers2.remove(laser2)
+        print(f"Lasers 1: {lasers1}")
+        print(f"Lasers 2: {lasers2}")
+        laser1["x"], laser1["y"], laser1["radius"] = shoot_laser(laser1["x"], laser1["y"], laser1["dir_x"], laser1["dir_y"], laser1["radius"])
+        laser2["x"], laser2["y"], laser2["radius"] = shoot_laser(laser2["x"], laser2["y"], laser2["dir_x"], laser2["dir_y"], laser2["radius"])
     
     
     SCREEN.blit(cockpit, (0,220)) #displays the cockpit 
